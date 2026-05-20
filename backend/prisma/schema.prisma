@@ -23,6 +23,7 @@ model Formation {
   id           Int           @id @default(autoincrement())
   titre        String
   duree        String
+  niveau       String
   inscriptions Inscription[]
 
   @@map("formations")
