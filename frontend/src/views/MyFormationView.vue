@@ -1,5 +1,3 @@
 <template>
-  <div>
-    <h1>Liste des formations</h1>
-  </div>
+  <h1>Ma formation inscrite</h1>
 </template>

@@ -6,26 +6,10 @@ import StudentFormationsView from '../views/StudentFormationsView.vue'
 import MyFormationView from '../views/MyFormationView.vue'
 
 const routes = [
-  {
-    path: '/',
-    name: 'login',
-    component: LoginView
-  },
-  {
-    path: '/admin/formations',
-    name: 'admin-formations',
-    component: AdminFormationsView
-  },
-  {
-    path: '/student/formations',
-    name: 'student-formations',
-    component: StudentFormationsView
-  },
-  {
-    path: '/student/my-formation',
-    name: 'my-formation',
-    component: MyFormationView
-  }
+  { path: '/', component: LoginView },
+  { path: '/admin/formations', component: AdminFormationsView },
+  { path: '/student/formations', component: StudentFormationsView },
+  { path: '/student/my-formation', component: MyFormationView }
 ]
 
 const router = createRouter({
