@@ -1,54 +1,71 @@
 <template>
   <div class="login-page">
     <div class="left-section">
-      <div class="logo">E-Doc</div>
+      <div class="logo">
+        <span class="logo-mark">E</span>
+        <span>E-Doc</span>
+      </div>
 
-      <h1>Bienvenue sur votre plateforme de formation</h1>
-      <p>
-        Gerez les formations, consultez les cours disponibles et suivez les
-        inscriptions depuis une interface simple et moderne.
-      </p>
+      <div class="hero-copy">
+        <span class="eyebrow">Plateforme e-learning</span>
+        <h1>Bienvenue sur votre espace de formation</h1>
+        <p>
+          Gerez les formations, consultez les cours disponibles et suivez les
+          inscriptions depuis une interface simple et moderne.
+        </p>
+      </div>
+
+      <img
+        class="login-illustration"
+        :src="elearningIllustration"
+        alt="Etudiants en apprentissage en ligne"
+      />
     </div>
 
-    <div class="login-card">
-      <h2>Connexion</h2>
-      <p class="subtitle">Connectez-vous a votre espace</p>
-
-      <form @submit.prevent="login">
-        <p v-if="error" class="error-message">{{ error }}</p>
-
-        <div class="form-group">
-          <label>Email</label>
-          <input
-            v-model="email"
-            type="email"
-            placeholder="exemple@email.com"
-            required
-          />
+    <div class="right-section">
+      <div class="login-card">
+        <div class="card-heading">
+          <span class="eyebrow">Connexion securisee</span>
+          <h2>Se connecter</h2>
+          <p class="subtitle">Connectez-vous a votre espace</p>
         </div>
 
-        <div class="form-group">
-          <label>Mot de passe</label>
-          <input
-            v-model="password"
-            type="password"
-            placeholder="Votre mot de passe"
-            required
-          />
-        </div>
+        <form @submit.prevent="login">
+          <p v-if="error" class="error-message">{{ error }}</p>
 
-        <div class="form-group">
-          <label>Role</label>
-          <select v-model="role">
-            <option value="admin">Administrateur</option>
-            <option value="etudiant">Etudiant</option>
-          </select>
-        </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input
+              v-model="email"
+              type="email"
+              placeholder="exemple@email.com"
+              required
+            />
+          </div>
 
-        <button type="submit" :disabled="loading">
-          {{ loading ? 'Connexion...' : 'Se connecter' }}
-        </button>
-      </form>
+          <div class="form-group">
+            <label>Mot de passe</label>
+            <input
+              v-model="password"
+              type="password"
+              placeholder="Votre mot de passe"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Role</label>
+            <select v-model="role">
+              <option value="admin">Administrateur</option>
+              <option value="etudiant">Etudiant</option>
+            </select>
+          </div>
+
+          <button type="submit" :disabled="loading">
+            {{ loading ? 'Connexion...' : 'Se connecter' }}
+          </button>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -57,6 +74,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { login as loginApi, saveCurrentUser } from '../services/api'
+import elearningIllustration from '../assets/elearning-illustration.png'
 
 const router = useRouter()
 
@@ -99,54 +117,107 @@ const login = async () => {
 .login-page {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  background: #f6f7fb;
-  font-family: Arial, sans-serif;
+  grid-template-columns: minmax(0, 1.1fr) minmax(420px, 0.9fr);
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 107, 95, 0.14), transparent 28%),
+    linear-gradient(135deg, #f8fbff 0%, #eef2ff 100%);
+  font-family: Inter, Arial, sans-serif;
+  overflow: hidden;
 }
 
 .left-section {
-  padding: 70px;
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  color: white;
+  position: relative;
+  padding: 42px 70px 54px;
+  color: #111827;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
+  min-height: 100vh;
 }
 
 .logo {
-  position: absolute;
-  top: 35px;
-  left: 70px;
-  font-size: 26px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
   font-weight: bold;
+  color: #111827;
+}
+
+.logo-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #ff2d72;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 14px 30px rgba(255, 45, 114, 0.28);
+}
+
+.hero-copy {
+  max-width: 620px;
+  margin-top: 24px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-bottom: 14px;
+  color: #ff2d72;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 
 .left-section h1 {
-  font-size: 48px;
+  font-size: 56px;
   line-height: 1.1;
-  max-width: 650px;
-  margin-bottom: 24px;
+  max-width: 680px;
+  margin-bottom: 18px;
+  color: #0f172a;
 }
 
 .left-section p {
   font-size: 18px;
   line-height: 1.7;
   max-width: 560px;
-  opacity: 0.9;
+  color: #64748b;
+}
+
+.login-illustration {
+  width: min(680px, 100%);
+  align-self: center;
+  filter: drop-shadow(0 28px 45px rgba(79, 70, 229, 0.16));
+}
+
+.right-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px;
 }
 
 .login-card {
-  width: 430px;
-  margin: auto;
-  background: white;
-  padding: 38px;
-  border-radius: 28px;
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.1);
+  width: min(440px, 100%);
+  background: rgba(255, 255, 255, 0.94);
+  padding: 42px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 18px;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12);
+}
+
+.card-heading {
+  margin-bottom: 30px;
 }
 
 .login-card h2 {
-  font-size: 30px;
-  color: #111827;
+  font-size: 34px;
+  color: #0f172a;
   margin-bottom: 8px;
 }
 
@@ -169,35 +240,41 @@ label {
 input,
 select {
   width: 100%;
-  padding: 14px 15px;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  background: #f9fafb;
+  padding: 15px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
   outline: none;
   font-size: 15px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 input:focus,
 select:focus {
-  border-color: #6366f1;
+  border-color: #ff2d72;
   background: white;
+  box-shadow: 0 0 0 4px rgba(255, 45, 114, 0.12);
 }
 
 button {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 12px;
   padding: 15px;
   border: none;
-  border-radius: 16px;
-  background: #4f46e5;
+  border-radius: 10px;
+  background: #ff2d72;
   color: white;
   font-weight: bold;
   font-size: 16px;
   cursor: pointer;
+  box-shadow: 0 16px 30px rgba(255, 45, 114, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 button:hover {
-  background: #4338ca;
+  background: #e11d62;
+  box-shadow: 0 18px 36px rgba(255, 45, 114, 0.34);
+  transform: translateY(-1px);
 }
 
 button:disabled {
@@ -217,14 +294,29 @@ button:disabled {
 @media (max-width: 900px) {
   .login-page {
     grid-template-columns: 1fr;
+    overflow: visible;
   }
 
   .left-section {
-    display: none;
+    min-height: auto;
+    padding: 32px 24px 16px;
+  }
+
+  .left-section h1 {
+    font-size: 36px;
+  }
+
+  .login-illustration {
+    max-height: 280px;
+  }
+
+  .right-section {
+    min-height: auto;
+    padding: 16px 20px 32px;
   }
 
   .login-card {
-    width: 90%;
+    padding: 28px;
   }
 }
 </style>

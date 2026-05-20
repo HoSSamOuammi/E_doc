@@ -2,7 +2,7 @@
   <DashboardLayout
     role="student"
     title="Mes formations"
-    subtitle="Consultez les formations auxquelles vous êtes inscrit."
+    subtitle="Consultez les formations auxquelles vous etes inscrit."
   >
     <div v-if="success" class="alert success">
       {{ success }}
@@ -23,8 +23,10 @@
         class="formation-card"
       >
         <div class="top">
-          <div class="icon">
-            {{ formation.titre.charAt(0) }}
+          <div class="course-cover">
+            <div class="icon">
+              {{ formation.titre.charAt(0) }}
+            </div>
           </div>
 
           <span class="badge">
@@ -35,7 +37,7 @@
         <h2>{{ formation.titre }}</h2>
 
         <p>
-          Durée :
+          Duree :
           <strong>{{ formation.duree }}</strong>
         </p>
 
@@ -44,7 +46,7 @@
           :disabled="deletingId === formation.id"
           @click="leaveFormation(formation)"
         >
-          {{ deletingId === formation.id ? 'Désinscription...' : 'Quitter la formation' }}
+          {{ deletingId === formation.id ? 'Desinscription...' : 'Quitter la formation' }}
         </button>
       </div>
     </section>
@@ -53,7 +55,7 @@
       <h2>Aucune formation</h2>
 
       <p>
-        Vous n'êtes inscrit à aucune formation pour le moment.
+        Vous n'etes inscrit a aucune formation pour le moment.
       </p>
     </div>
   </DashboardLayout>
@@ -112,7 +114,7 @@ const leaveFormation = async (formation) => {
   try {
     await supprimerInscription(formation.id, currentUser.id)
     await loadInscriptions()
-    success.value = `Vous avez quitté ${formation.titre}.`
+    success.value = `Vous avez quitte ${formation.titre}.`
   } catch (apiError) {
     error.value = apiError.message
   } finally {
@@ -126,104 +128,133 @@ onMounted(loadInscriptions)
 <style scoped>
 .alert {
   padding: 16px;
-  border-radius: 14px;
+  border-radius: 12px;
   margin-bottom: 24px;
   font-weight: 600;
+  border: 1px solid transparent;
 }
 
 .alert.success {
   background: #ecfdf5;
+  border-color: #bbf7d0;
   color: #047857;
 }
 
 .alert.error {
   background: #fef2f2;
+  border-color: #fecaca;
   color: #b91c1c;
 }
 
 .state-card {
   background: white;
   padding: 24px;
-  border-radius: 18px;
+  border: 1px solid #eef2f7;
+  border-radius: 16px;
   color: #6b7280;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.05);
 }
 
 .formations-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 22px;
+  gap: 24px;
 }
 
 .formation-card {
   background: white;
-  padding: 28px;
-  border-radius: 24px;
+  border: 1px solid #eef2f7;
+  border-radius: 16px;
+  overflow: hidden;
   max-width: 500px;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.formation-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.1);
 }
 
 .top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  position: relative;
   margin-bottom: 22px;
 }
 
+.course-cover {
+  height: 160px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.55), transparent 28%),
+    linear-gradient(135deg, #6366f1, #ff6b5f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 18px;
-  background: #eef2ff;
-  color: #4f46e5;
+  width: 68px;
+  height: 68px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #ff2d72;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 30px;
+  font-weight: 900;
 }
 
 .badge {
-  background: #eef2ff;
-  color: #4f46e5;
+  position: absolute;
+  right: 16px;
+  bottom: -15px;
+  background: white;
+  color: #ff2d72;
   padding: 7px 13px;
   border-radius: 999px;
   font-size: 13px;
-  font-weight: bold;
+  font-weight: 800;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
 }
 
 h2 {
-  margin-bottom: 14px;
-  color: #111827;
+  margin: 0 20px 14px;
+  color: #0f172a;
+  font-size: 22px;
+  line-height: 1.35;
 }
 
 p {
-  color: #6b7280;
-  margin-bottom: 24px;
+  color: #64748b;
+  margin: 0 20px 24px;
 }
 
 .leave-btn {
-  width: 100%;
+  width: calc(100% - 40px);
+  margin: 0 20px 20px;
   padding: 13px;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   background: #ef4444;
   color: white;
   font-weight: bold;
   cursor: pointer;
+  box-shadow: 0 14px 24px rgba(239, 68, 68, 0.18);
 }
 
 .leave-btn:disabled {
   background: #fca5a5;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .empty-state {
   background: white;
-  padding: 40px;
-  border-radius: 24px;
+  padding: 46px;
+  border: 1px solid #eef2f7;
+  border-radius: 16px;
   text-align: center;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.05);
 }
 
 .empty-state h2 {

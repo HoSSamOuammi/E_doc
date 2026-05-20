@@ -6,15 +6,26 @@
 
 body {
   font-family: Inter, Arial, sans-serif;
-  background: #f6f7fb;
+  background: #f7f8fb;
   color: #1f2937;
+  min-width: 320px;
 }
 
 button {
   font-family: inherit;
 }
 
+input,
+select {
+  font-family: inherit;
+}
+
 a {
   text-decoration: none;
   color: inherit;
+}
+
+::selection {
+  background: #ffe4ee;
+  color: #be124c;
 }

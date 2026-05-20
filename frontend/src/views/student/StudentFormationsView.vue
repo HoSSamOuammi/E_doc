@@ -4,6 +4,15 @@
     title="Formations disponibles"
     subtitle="Consultez les formations et inscrivez-vous."
   >
+    <div class="course-toolbar">
+      <span class="toolbar-label">Catalogue</span>
+      <div class="toolbar-tabs">
+        <span class="tab active">Tous</span>
+        <span class="tab">Disponibles</span>
+        <span class="tab">Inscrits</span>
+      </div>
+    </div>
+
     <div v-if="success" class="alert success">
       {{ success }}
     </div>
@@ -23,8 +32,10 @@
         class="course-card"
       >
         <div class="course-top">
-          <div class="icon">
-            {{ formation.titre.charAt(0) }}
+          <div class="course-cover">
+            <div class="icon">
+              {{ formation.titre.charAt(0) }}
+            </div>
           </div>
 
           <span class="badge">
@@ -35,7 +46,7 @@
         <h3>{{ formation.titre }}</h3>
 
         <p class="duration">
-          Durée : {{ formation.duree }}
+          Duree : {{ formation.duree }}
         </p>
 
         <button
@@ -104,7 +115,7 @@ const buttonLabel = (formationId) => {
     return 'Inscription...'
   }
 
-  return isRegistered(formationId) ? 'Déjà inscrit' : "S'inscrire"
+  return isRegistered(formationId) ? 'Deja inscrit' : "S'inscrire"
 }
 
 const registerFormation = async (formation) => {
@@ -119,7 +130,7 @@ const registerFormation = async (formation) => {
   try {
     await inscrireEtudiant(currentUser.value.id, formation.id)
     await loadStudentData()
-    success.value = `Inscription réussie à ${formation.titre}.`
+    success.value = `Inscription reussie a ${formation.titre}.`
   } catch (apiError) {
     error.value = apiError.message
   } finally {
@@ -133,94 +144,164 @@ onMounted(loadStudentData)
 <style scoped>
 .alert {
   padding: 16px;
-  border-radius: 14px;
+  border-radius: 12px;
   margin-bottom: 24px;
   font-weight: 600;
+  border: 1px solid transparent;
 }
 
 .alert.success {
   background: #ecfdf5;
+  border-color: #bbf7d0;
   color: #047857;
 }
 
 .alert.error {
   background: #fef2f2;
+  border-color: #fecaca;
   color: #b91c1c;
 }
 
 .state-card {
   background: white;
   padding: 24px;
-  border-radius: 18px;
+  border: 1px solid #eef2f7;
+  border-radius: 16px;
   color: #6b7280;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.05);
+}
+
+.course-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background: white;
+  border: 1px solid #eef2f7;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 22px;
+}
+
+.toolbar-label {
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.toolbar-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tab {
+  padding: 9px 14px;
+  border-radius: 999px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tab.active {
+  color: #ff2d72;
+  background: #fff1f5;
 }
 
 .formations-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
 }
 
 .course-card {
   background: white;
-  padding: 24px;
-  border-radius: 22px;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+  border: 1px solid #eef2f7;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.1);
 }
 
 .course-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18px;
-}
-
-.icon {
-  width: 54px;
-  height: 54px;
-  border-radius: 16px;
-  background: #eef2ff;
-  color: #4f46e5;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 22px;
-  font-weight: bold;
-}
-
-.badge {
-  background: #eef2ff;
-  color: #4f46e5;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: bold;
-}
-
-h3 {
-  margin-bottom: 10px;
-  color: #111827;
-}
-
-.duration {
-  color: #6b7280;
+  position: relative;
   margin-bottom: 20px;
 }
 
+.course-cover {
+  height: 150px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.55), transparent 28%),
+    linear-gradient(135deg, #6366f1, #ff6b5f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #ff2d72;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.badge {
+  position: absolute;
+  right: 16px;
+  bottom: -15px;
+  background: white;
+  color: #ff2d72;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+h3 {
+  margin: 0 18px 12px;
+  color: #0f172a;
+  font-size: 19px;
+  line-height: 1.35;
+}
+
+.duration {
+  color: #64748b;
+  margin: 0 18px 22px;
+}
+
 button {
-  width: 100%;
+  width: calc(100% - 36px);
+  margin: 0 18px 18px;
   padding: 12px;
   border: none;
-  border-radius: 12px;
-  background: #4f46e5;
+  border-radius: 10px;
+  background: #ff2d72;
   color: white;
   font-weight: bold;
   cursor: pointer;
+  box-shadow: 0 14px 24px rgba(255, 45, 114, 0.2);
 }
 
 button:disabled {
   background: #d1d5db;
   cursor: not-allowed;
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  .course-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 </style>
