@@ -53,6 +53,7 @@ app.get("/", (req, res) => {
       "PUT /formations/:id",
       "DELETE /formations/:id",
       "POST /inscriptions",
+      "DELETE /inscriptions/:id",
       "GET /mes-inscriptions/:id",
     ],
   });
@@ -277,6 +278,52 @@ app.post("/inscriptions", verifierRole("etudiant"), async (req, res) => {
   }
 });
 
+// Etudiant: se desinscrire d'une formation.
+app.delete("/inscriptions/:id", verifierRole("etudiant"), async (req, res) => {
+  const id = Number(req.params.id);
+  const etudiantId = Number(req.headers["etudiant-id"]);
+
+  if (!id) {
+    return res.status(400).json({
+      message: "Id inscription invalide.",
+    });
+  }
+
+  if (!etudiantId) {
+    return res.status(400).json({
+      message: "Id etudiant obligatoire.",
+    });
+  }
+
+  try {
+    const inscription = await prisma.inscription.findUnique({
+      where: { id },
+    });
+
+    if (!inscription) {
+      return res.status(404).json({
+        message: "Inscription non trouvee.",
+      });
+    }
+
+    if (inscription.etudiantId !== etudiantId) {
+      return res.status(403).json({
+        message: "Cette inscription n'appartient pas a cet etudiant.",
+      });
+    }
+
+    await prisma.inscription.delete({
+      where: { id },
+    });
+
+    res.json({
+      message: "Desinscription effectuee avec succes.",
+    });
+  } catch (error) {
+    erreurServeur(res, error);
+  }
+});
+
 // Etudiant: afficher ses inscriptions.
 app.get("/mes-inscriptions/:id", verifierRole("etudiant"), async (req, res) => {
   const etudiantId = Number(req.params.id);
@@ -302,6 +349,7 @@ app.get("/mes-inscriptions/:id", verifierRole("etudiant"), async (req, res) => {
 
     const resultat = inscriptions.map((inscription) => ({
       id: inscription.id,
+      formationId: inscription.formationId,
       titre: inscription.formation.titre,
       duree: inscription.formation.duree,
       niveau: inscription.formation.niveau,

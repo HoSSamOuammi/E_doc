@@ -15,6 +15,8 @@
       <p class="subtitle">Connectez-vous à votre espace</p>
 
       <form @submit.prevent="login">
+        <p v-if="error" class="error-message">{{ error }}</p>
+
         <div class="form-group">
           <label>Email</label>
           <input v-model="email" type="email" placeholder="exemple@email.com" required />
@@ -29,11 +31,13 @@
           <label>Rôle</label>
           <select v-model="role">
             <option value="admin">Administrateur</option>
-            <option value="student">Étudiant</option>
+            <option value="etudiant">Étudiant</option>
           </select>
         </div>
 
-        <button type="submit">Se connecter</button>
+        <button type="submit" :disabled="loading">
+          {{ loading ? 'Connexion...' : 'Se connecter' }}
+        </button>
       </form>
     </div>
   </div>
@@ -42,18 +46,41 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { login as loginApi, saveCurrentUser } from '../services/api'
 
 const router = useRouter()
 
 const email = ref('')
 const password = ref('')
-const role = ref('student')
+const role = ref('etudiant')
+const loading = ref(false)
+const error = ref('')
 
-const login = () => {
-  if (role.value === 'admin') {
-    router.push('/admin/formations')
-  } else {
+const login = async () => {
+  loading.value = true
+  error.value = ''
+
+  try {
+    const response = await loginApi(email.value, password.value)
+    const user = response.user
+
+    if (user.role !== role.value) {
+      error.value = 'Le rôle sélectionné ne correspond pas à ce compte.'
+      return
+    }
+
+    saveCurrentUser(user)
+
+    if (user.role === 'admin') {
+      router.push('/admin/formations')
+      return
+    }
+
     router.push('/student/formations')
+  } catch (apiError) {
+    error.value = apiError.message
+  } finally {
+    loading.value = false
   }
 }
 </script>
@@ -161,6 +188,20 @@ button {
 
 button:hover {
   background: #4338ca;
+}
+
+button:disabled {
+  background: #a5b4fc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-weight: 600;
 }
 
 @media (max-width: 900px) {

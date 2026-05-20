@@ -5,6 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
     "setup": "prisma db push && npm run seed",
     "seed": "node prisma/seed.js",
     "studio": "prisma studio --hostname 0.0.0.0 --port 5555",
