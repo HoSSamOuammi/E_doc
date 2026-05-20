@@ -117,21 +117,23 @@ const login = async () => {
 .login-page {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(420px, 0.9fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(420px, 0.95fr);
   background:
-    radial-gradient(circle at 12% 12%, rgba(255, 107, 95, 0.14), transparent 28%),
-    linear-gradient(135deg, #f8fbff 0%, #eef2ff 100%);
+    radial-gradient(circle at 16% 18%, rgba(244, 114, 182, 0.13), transparent 30%),
+    radial-gradient(circle at 66% 84%, rgba(99, 102, 241, 0.08), transparent 28%),
+    linear-gradient(135deg, #fbfcff 0%, #f1f5ff 100%);
   font-family: Inter, Arial, sans-serif;
   overflow: hidden;
 }
 
 .left-section {
   position: relative;
-  padding: 42px 70px 54px;
+  padding: 42px 64px;
   color: #111827;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 32px;
   min-height: 100vh;
 }
 
@@ -148,25 +150,25 @@ const login = async () => {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: #ff2d72;
+  background: #ec4899;
   color: white;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 14px 30px rgba(255, 45, 114, 0.28);
+  box-shadow: 0 14px 30px rgba(236, 72, 153, 0.22);
 }
 
 .hero-copy {
-  max-width: 620px;
-  margin-top: 24px;
+  max-width: 560px;
+  margin-top: 6px;
 }
 
 .eyebrow {
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  margin-bottom: 14px;
-  color: #ff2d72;
+  margin-bottom: 12px;
+  color: #db2777;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0;
@@ -174,24 +176,27 @@ const login = async () => {
 }
 
 .left-section h1 {
-  font-size: 56px;
-  line-height: 1.1;
-  max-width: 680px;
-  margin-bottom: 18px;
+  font-size: 46px;
+  line-height: 1.12;
+  max-width: 600px;
+  margin-bottom: 16px;
   color: #0f172a;
 }
 
 .left-section p {
-  font-size: 18px;
-  line-height: 1.7;
-  max-width: 560px;
+  font-size: 17px;
+  line-height: 1.65;
+  max-width: 520px;
   color: #64748b;
 }
 
 .login-illustration {
-  width: min(680px, 100%);
-  align-self: center;
-  filter: drop-shadow(0 28px 45px rgba(79, 70, 229, 0.16));
+  width: min(520px, 88%);
+  max-height: 310px;
+  object-fit: contain;
+  align-self: flex-start;
+  margin-left: 8px;
+  filter: drop-shadow(0 22px 34px rgba(79, 70, 229, 0.13));
 }
 
 .right-section {
@@ -199,16 +204,16 @@ const login = async () => {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 40px;
+  padding: 44px 56px 44px 32px;
 }
 
 .login-card {
-  width: min(440px, 100%);
-  background: rgba(255, 255, 255, 0.94);
-  padding: 42px;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 18px;
-  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12);
+  width: min(430px, 100%);
+  background: rgba(255, 255, 255, 0.96);
+  padding: 40px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.1);
 }
 
 .card-heading {
@@ -216,7 +221,7 @@ const login = async () => {
 }
 
 .login-card h2 {
-  font-size: 34px;
+  font-size: 32px;
   color: #0f172a;
   margin-bottom: 8px;
 }
@@ -251,9 +256,9 @@ select {
 
 input:focus,
 select:focus {
-  border-color: #ff2d72;
+  border-color: #ec4899;
   background: white;
-  box-shadow: 0 0 0 4px rgba(255, 45, 114, 0.12);
+  box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.11);
 }
 
 button {
@@ -262,18 +267,18 @@ button {
   padding: 15px;
   border: none;
   border-radius: 10px;
-  background: #ff2d72;
+  background: #ec4899;
   color: white;
   font-weight: bold;
   font-size: 16px;
   cursor: pointer;
-  box-shadow: 0 16px 30px rgba(255, 45, 114, 0.28);
+  box-shadow: 0 16px 30px rgba(236, 72, 153, 0.23);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 button:hover {
-  background: #e11d62;
-  box-shadow: 0 18px 36px rgba(255, 45, 114, 0.34);
+  background: #db2777;
+  box-shadow: 0 18px 34px rgba(236, 72, 153, 0.28);
   transform: translateY(-1px);
 }
 
@@ -299,15 +304,19 @@ button:disabled {
 
   .left-section {
     min-height: auto;
-    padding: 32px 24px 16px;
+    padding: 30px 24px 12px;
+    gap: 22px;
   }
 
   .left-section h1 {
-    font-size: 36px;
+    font-size: 34px;
   }
 
   .login-illustration {
-    max-height: 280px;
+    width: min(420px, 92%);
+    max-height: 230px;
+    align-self: center;
+    margin-left: 0;
   }
 
   .right-section {
