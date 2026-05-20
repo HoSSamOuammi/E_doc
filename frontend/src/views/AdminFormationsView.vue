@@ -5,9 +5,9 @@
 
       <nav>
         <a class="active">Formations</a>
-        <a>Étudiants</a>
+        <a>Etudiants</a>
         <a>Inscriptions</a>
-        <a @click="logout">Déconnexion</a>
+        <a @click="logout">Deconnexion</a>
       </nav>
     </aside>
 
@@ -30,12 +30,12 @@
         </div>
 
         <div class="stat-card">
-          <span>Étudiants inscrits</span>
+          <span>Etudiants inscrits</span>
           <strong>24</strong>
         </div>
 
         <div class="stat-card">
-          <span>Catégorie active</span>
+          <span>Categorie active</span>
           <strong>Web</strong>
         </div>
       </section>
@@ -44,16 +44,28 @@
         <h2>Ajouter une formation</h2>
 
         <form @submit.prevent="addFormation">
-          <input v-model="newFormation.titre" placeholder="Titre de la formation" required />
-          <input v-model="newFormation.duree" placeholder="Durée ex: 30h" required />
-          <input v-model="newFormation.niveau" placeholder="Niveau ex: Débutant" required />
+          <input
+            v-model="newFormation.titre"
+            placeholder="Titre de la formation"
+            required
+          />
+          <input v-model="newFormation.duree" placeholder="Duree ex: 30h" required />
+          <input
+            v-model="newFormation.niveau"
+            placeholder="Niveau ex: Debutant"
+            required
+          />
 
           <button type="submit">Ajouter la formation</button>
         </form>
       </section>
 
       <section class="formations-grid">
-        <div v-for="formation in formations" :key="formation.id" class="course-card">
+        <div
+          v-for="formation in formations"
+          :key="formation.id"
+          class="course-card"
+        >
           <div class="course-icon">
             {{ formation.titre.charAt(0) }}
           </div>
@@ -61,11 +73,15 @@
           <span class="badge">{{ formation.niveau }}</span>
 
           <h3>{{ formation.titre }}</h3>
-          <p>Durée : {{ formation.duree }}</p>
+          <p>Duree : {{ formation.duree }}</p>
 
           <div class="course-footer">
-            <button class="edit" @click="editFormation(formation)">Modifier</button>
-            <button class="delete" @click="deleteFormation(formation.id)">Supprimer</button>
+            <button class="edit" @click="editFormation(formation)">
+              Modifier
+            </button>
+            <button class="delete" @click="deleteFormation(formation.id)">
+              Supprimer
+            </button>
           </div>
         </div>
       </section>
@@ -81,9 +97,9 @@ const router = useRouter()
 const showForm = ref(true)
 
 const formations = ref([
-  { id: 1, titre: 'Développement Web', duree: '30h', niveau: 'Débutant' },
-  { id: 2, titre: 'Base de données', duree: '20h', niveau: 'Intermédiaire' },
-  { id: 3, titre: 'Vue.js', duree: '15h', niveau: 'Avancé' }
+  { id: 1, titre: 'Developpement Web', duree: '30h', niveau: 'Debutant' },
+  { id: 2, titre: 'Base de donnees', duree: '20h', niveau: 'Intermediaire' },
+  { id: 3, titre: 'Vue.js', duree: '15h', niveau: 'Avance' }
 ])
 
 const newFormation = reactive({
@@ -111,7 +127,7 @@ const deleteFormation = (id) => {
 
 const editFormation = (formation) => {
   const titre = prompt('Nouveau titre :', formation.titre)
-  const duree = prompt('Nouvelle durée :', formation.duree)
+  const duree = prompt('Nouvelle duree :', formation.duree)
   const niveau = prompt('Nouveau niveau :', formation.niveau)
 
   if (titre && duree && niveau) {

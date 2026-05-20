@@ -5,31 +5,41 @@
 
       <h1>Bienvenue sur votre plateforme de formation</h1>
       <p>
-        Gérez les formations, consultez les cours disponibles et suivez les inscriptions
-        depuis une interface simple et moderne.
+        Gerez les formations, consultez les cours disponibles et suivez les
+        inscriptions depuis une interface simple et moderne.
       </p>
     </div>
 
     <div class="login-card">
       <h2>Connexion</h2>
-      <p class="subtitle">Connectez-vous à votre espace</p>
+      <p class="subtitle">Connectez-vous a votre espace</p>
 
       <form @submit.prevent="login">
         <div class="form-group">
           <label>Email</label>
-          <input v-model="email" type="email" placeholder="exemple@email.com" required />
+          <input
+            v-model="email"
+            type="email"
+            placeholder="exemple@email.com"
+            required
+          />
         </div>
 
         <div class="form-group">
           <label>Mot de passe</label>
-          <input v-model="password" type="password" placeholder="Votre mot de passe" required />
+          <input
+            v-model="password"
+            type="password"
+            placeholder="Votre mot de passe"
+            required
+          />
         </div>
 
         <div class="form-group">
-          <label>Rôle</label>
+          <label>Role</label>
           <select v-model="role">
             <option value="admin">Administrateur</option>
-            <option value="student">Étudiant</option>
+            <option value="student">Etudiant</option>
           </select>
         </div>
 
