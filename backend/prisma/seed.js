@@ -5,43 +5,70 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.inscription.deleteMany();
-  await prisma.formation.deleteMany();
-  await prisma.user.deleteMany();
-
-  await prisma.user.createMany({
-    data: [
-      {
-        nom: "Admin",
-        prenom: "Systeme",
-        email: "admin@gmail.com",
-        password: "123456",
-        role: "admin",
-      },
-      {
-        nom: "Ali",
-        prenom: "Benali",
-        email: "ali@gmail.com",
-        password: "123456",
-        role: "etudiant",
-      },
-    ],
+  const admin = await prisma.user.upsert({
+    where: { email: "admin@gmail.com" },
+    update: {},
+    create: {
+      nom: "Admin",
+      prenom: "Systeme",
+      email: "admin@gmail.com",
+      password: "123456",
+      role: "admin",
+    },
   });
 
-  await prisma.formation.createMany({
-    data: [
-      {
-        titre: "Developpement Web",
-        duree: "3 mois",
-      },
-      {
-        titre: "MySQL debutant",
-        duree: "2 mois",
-      },
-    ],
+  const etudiant = await prisma.user.upsert({
+    where: { email: "ali@gmail.com" },
+    update: {},
+    create: {
+      nom: "Ali",
+      prenom: "Benali",
+      email: "ali@gmail.com",
+      password: "123456",
+      role: "etudiant",
+    },
   });
 
-  console.log("Donnees de test ajoutees avec succes.");
+  const totalFormations = await prisma.formation.count();
+
+  if (totalFormations === 0) {
+    await prisma.formation.createMany({
+      data: [
+        {
+          titre: "Developpement Web",
+          duree: "3 mois",
+        },
+        {
+          titre: "MySQL debutant",
+          duree: "2 mois",
+        },
+      ],
+    });
+  }
+
+  const premiereFormation = await prisma.formation.findFirst({
+    orderBy: { id: "asc" },
+  });
+
+  if (premiereFormation) {
+    await prisma.inscription.upsert({
+      where: {
+        etudiantId_formationId: {
+          etudiantId: etudiant.id,
+          formationId: premiereFormation.id,
+        },
+      },
+      update: {},
+      create: {
+        etudiantId: etudiant.id,
+        formationId: premiereFormation.id,
+      },
+    });
+  }
+
+  console.log("Donnees de test ajoutees.");
+  console.log(`Admin: ${admin.email} / 123456`);
+  console.log(`Etudiant: ${etudiant.email} / 123456`);
 }
 
 main()

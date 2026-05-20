@@ -6,19 +6,19 @@ const { PrismaClient } = require("@prisma/client");
 
 const app = express();
 const prisma = new PrismaClient();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
 
-// Middleware tres simple pour verifier le role envoye dans les headers.
+// Middleware tres simple: on envoie le role dans le header "role".
 function verifierRole(roleAttendu) {
   return (req, res, next) => {
     const role = req.headers.role;
 
     if (role !== roleAttendu) {
       return res.status(403).json({
-        message: `Acces refuse. Cette route est reservee au role ${roleAttendu}.`,
+        message: `Acces refuse. Route reservee au role ${roleAttendu}.`,
       });
     }
 
@@ -26,11 +26,39 @@ function verifierRole(roleAttendu) {
   };
 }
 
+function cacherPassword(user) {
+  return {
+    id: user.id,
+    nom: user.nom,
+    prenom: user.prenom,
+    email: user.email,
+    role: user.role,
+  };
+}
+
+function erreurServeur(res, error) {
+  res.status(500).json({
+    message: "Erreur serveur.",
+    error: error.message,
+  });
+}
+
 app.get("/", (req, res) => {
-  res.json({ message: "API backend en marche." });
+  res.json({
+    message: "API E-doc en marche.",
+    routes: [
+      "POST /login",
+      "GET /formations",
+      "POST /formations",
+      "PUT /formations/:id",
+      "DELETE /formations/:id",
+      "POST /inscriptions",
+      "GET /mes-inscriptions/:id",
+    ],
+  });
 });
 
-// Login simple avec email + password.
+// Connexion simple avec email et password.
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -46,13 +74,6 @@ app.post("/login", async (req, res) => {
         email,
         password,
       },
-      select: {
-        id: true,
-        nom: true,
-        prenom: true,
-        email: true,
-        role: true,
-      },
     });
 
     if (!user) {
@@ -63,13 +84,10 @@ app.post("/login", async (req, res) => {
 
     res.json({
       message: "Connexion reussie.",
-      user,
+      user: cacherPassword(user),
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur serveur.",
-      error: error.message,
-    });
+    erreurServeur(res, error);
   }
 });
 
@@ -78,20 +96,17 @@ app.get("/formations", async (req, res) => {
   try {
     const formations = await prisma.formation.findMany({
       orderBy: {
-        id: "desc",
+        id: "asc",
       },
     });
 
     res.json(formations);
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur serveur.",
-      error: error.message,
-    });
+    erreurServeur(res, error);
   }
 });
 
-// Admin : ajouter une formation.
+// Admin: ajouter une formation.
 app.post("/formations", verifierRole("admin"), async (req, res) => {
   const { titre, duree } = req.body;
 
@@ -111,17 +126,14 @@ app.post("/formations", verifierRole("admin"), async (req, res) => {
 
     res.status(201).json({
       message: "Formation ajoutee avec succes.",
-      id: formation.id,
+      formation,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur serveur.",
-      error: error.message,
-    });
+    erreurServeur(res, error);
   }
 });
 
-// Admin : modifier une formation.
+// Admin: modifier une formation.
 app.put("/formations/:id", verifierRole("admin"), async (req, res) => {
   const id = Number(req.params.id);
   const { titre, duree } = req.body;
@@ -149,7 +161,7 @@ app.put("/formations/:id", verifierRole("admin"), async (req, res) => {
       });
     }
 
-    await prisma.formation.update({
+    const formationModifiee = await prisma.formation.update({
       where: { id },
       data: {
         titre,
@@ -159,16 +171,14 @@ app.put("/formations/:id", verifierRole("admin"), async (req, res) => {
 
     res.json({
       message: "Formation modifiee avec succes.",
+      formation: formationModifiee,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur serveur.",
-      error: error.message,
-    });
+    erreurServeur(res, error);
   }
 });
 
-// Admin : supprimer une formation.
+// Admin: supprimer une formation.
 app.delete("/formations/:id", verifierRole("admin"), async (req, res) => {
   const id = Number(req.params.id);
 
@@ -197,14 +207,11 @@ app.delete("/formations/:id", verifierRole("admin"), async (req, res) => {
       message: "Formation supprimee avec succes.",
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur serveur.",
-      error: error.message,
-    });
+    erreurServeur(res, error);
   }
 });
 
-// Etudiant : s'inscrire a une formation.
+// Etudiant: s'inscrire a une formation.
 app.post("/inscriptions", verifierRole("etudiant"), async (req, res) => {
   const etudiantId = Number(req.body.etudiant_id);
   const formationId = Number(req.body.formation_id);
@@ -223,17 +230,15 @@ app.post("/inscriptions", verifierRole("etudiant"), async (req, res) => {
       },
     });
 
+    const formation = await prisma.formation.findUnique({
+      where: { id: formationId },
+    });
+
     if (!etudiant) {
       return res.status(404).json({
         message: "Etudiant non trouve.",
       });
     }
-
-    const formation = await prisma.formation.findUnique({
-      where: {
-        id: formationId,
-      },
-    });
 
     if (!formation) {
       return res.status(404).json({
@@ -241,14 +246,14 @@ app.post("/inscriptions", verifierRole("etudiant"), async (req, res) => {
       });
     }
 
-    const inscriptionExiste = await prisma.inscription.findFirst({
+    const dejaInscrit = await prisma.inscription.findFirst({
       where: {
         etudiantId,
         formationId,
       },
     });
 
-    if (inscriptionExiste) {
+    if (dejaInscrit) {
       return res.status(400).json({
         message: "Cet etudiant est deja inscrit a cette formation.",
       });
@@ -263,67 +268,51 @@ app.post("/inscriptions", verifierRole("etudiant"), async (req, res) => {
 
     res.status(201).json({
       message: "Inscription ajoutee avec succes.",
-      id: inscription.id,
+      inscription,
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur serveur.",
-      error: error.message,
-    });
+    erreurServeur(res, error);
   }
 });
 
-// Etudiant : afficher ses inscriptions.
-app.get(
-  "/mes-inscriptions/:id",
-  verifierRole("etudiant"),
-  async (req, res) => {
-    const etudiantId = Number(req.params.id);
+// Etudiant: afficher ses inscriptions.
+app.get("/mes-inscriptions/:id", verifierRole("etudiant"), async (req, res) => {
+  const etudiantId = Number(req.params.id);
 
-    if (!etudiantId) {
-      return res.status(400).json({
-        message: "Id etudiant invalide.",
-      });
-    }
-
-    try {
-      const inscriptions = await prisma.inscription.findMany({
-        where: {
-          etudiantId,
-        },
-        include: {
-          formation: {
-            select: {
-              titre: true,
-              duree: true,
-            },
-          },
-        },
-        orderBy: {
-          id: "desc",
-        },
-      });
-
-      const resultat = inscriptions.map((inscription) => ({
-        id: inscription.id,
-        titre: inscription.formation.titre,
-        duree: inscription.formation.duree,
-      }));
-
-      res.json(resultat);
-    } catch (error) {
-      res.status(500).json({
-        message: "Erreur serveur.",
-        error: error.message,
-      });
-    }
+  if (!etudiantId) {
+    return res.status(400).json({
+      message: "Id etudiant invalide.",
+    });
   }
-);
+
+  try {
+    const inscriptions = await prisma.inscription.findMany({
+      where: {
+        etudiantId,
+      },
+      include: {
+        formation: true,
+      },
+      orderBy: {
+        id: "asc",
+      },
+    });
+
+    const resultat = inscriptions.map((inscription) => ({
+      id: inscription.id,
+      titre: inscription.formation.titre,
+      duree: inscription.formation.duree,
+    }));
+
+    res.json(resultat);
+  } catch (error) {
+    erreurServeur(res, error);
+  }
+});
 
 async function startServer() {
   try {
     await prisma.$connect();
-    console.log("Connexion Prisma reussie.");
 
     app.listen(PORT, () => {
       console.log(`Serveur lance sur http://localhost:${PORT}`);

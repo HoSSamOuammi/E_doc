@@ -1,14 +1,14 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "API REST simple pour la gestion des etudiants et des formations avec Prisma",
+  "description": "API REST simple pour la gestion des etudiants et des formations",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push",
+    "setup": "prisma db push && npm run seed",
     "seed": "node prisma/seed.js",
-    "test": "echo \"Aucun test configure\""
+    "studio": "prisma studio --hostname 0.0.0.0 --port 5555",
+    "test": "node --check server.js"
   },
   "keywords": [],
   "author": "",

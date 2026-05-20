@@ -1,80 +1,147 @@
-# Backend - Gestion des etudiants et des formations
+# Backend E-doc
 
-Backend simple avec Node.js, Express, MySQL et Prisma.
+Backend simple pour un projet etudiant.
 
-## Installation
+Le projet utilise :
 
-Placez-vous dans le dossier `backend` puis installez les dependances :
+- Node.js
+- Express
+- Prisma
+- MySQL
+- Docker
+- Prisma Studio
+
+L'objectif est de garder un backend facile a expliquer en 1h, avec une vraie base de donnees visible dans Prisma Studio.
+
+## Ce que fait le backend
+
+- connexion simple avec email et password
+- affichage des formations
+- ajout, modification et suppression d'une formation par un admin
+- inscription d'un etudiant a une formation
+- affichage des inscriptions d'un etudiant
+
+## Structure importante
+
+```text
+backend/
+  server.js                 # routes Express
+  package.json              # scripts npm
+  Dockerfile                # image Docker du backend
+  docker-entrypoint.sh      # prepare Prisma puis lance le serveur
+  prisma/
+    schema.prisma           # tables Prisma
+    seed.js                 # donnees de test
+docker-compose.yml          # MySQL + backend + Prisma Studio
+```
+
+## Lancer avec Docker
+
+Depuis la racine du projet :
+
+```bash
+docker compose up --build
+```
+
+Services disponibles :
+
+```text
+Backend API    : http://localhost:5000
+Prisma Studio  : http://localhost:5555
+MySQL          : localhost:3307
+```
+
+Pour arreter :
+
+```bash
+docker compose down
+```
+
+Pour supprimer aussi les donnees MySQL :
+
+```bash
+docker compose down -v
+```
+
+## Prisma Studio
+
+Prisma Studio permet de voir les tables dans le navigateur.
+
+Avec Docker, il est lance automatiquement ici :
+
+```text
+http://localhost:5555
+```
+
+Tables visibles :
+
+- `User`
+- `Formation`
+- `Inscription`
+
+## Lancer sans Docker
+
+Il faut avoir MySQL lance sur le port `3307`.
+
+Depuis `backend` :
 
 ```bash
 npm install
 ```
 
-## Configuration MySQL
-
-1. Creez un fichier `.env` dans `backend`
-2. Ajoutez votre connexion MySQL
-
-Exemple :
+Creer un fichier `.env` :
 
 ```env
-DATABASE_URL="mysql://root:@localhost:3306/gestion_etudiants"
+DATABASE_URL="mysql://root:root@localhost:3307/gestion_etudiants"
+PORT=5000
 ```
 
-## Base de donnees avec Prisma
-
-1. Creez la base `gestion_etudiants` dans MySQL
-2. Lancez Prisma pour creer les tables
-3. Ajoutez les donnees de test
-
-Commandes :
+Preparer la base :
 
 ```bash
-npm run prisma:push
-npm run seed
+npm run setup
 ```
 
-Le fichier `database.sql` est aussi disponible si vous voulez creer la base manuellement.
-
-## Lancer le serveur
+Lancer le backend :
 
 ```bash
 npm start
 ```
 
-Le serveur demarre sur :
+Lancer Prisma Studio :
 
-```text
-http://localhost:5000
+```bash
+npm run studio
 ```
 
 ## Comptes de test
 
-- Admin : `admin@gmail.com` / `123456`
-- Etudiant : `ali@gmail.com` / `123456`
+Admin :
 
-## Authentification simple
+```text
+email: admin@gmail.com
+password: 123456
+role: admin
+```
 
-Le projet utilise un login simple avec `email` + `password`.
+Etudiant :
 
-Pour les routes protegees, envoyez aussi le header `role` :
-
-- `role: admin` pour ajouter, modifier ou supprimer une formation
-- `role: etudiant` pour faire une inscription ou voir les inscriptions
+```text
+email: ali@gmail.com
+password: 123456
+role: etudiant
+```
 
 ## Routes
 
-- `POST /login`
-- `GET /formations`
-- `POST /formations`
-- `PUT /formations/:id`
-- `DELETE /formations/:id`
-- `POST /inscriptions`
-- `GET /mes-inscriptions/:id`
+### Connexion
 
-## Exemples de body JSON
+```http
+POST /login
+Content-Type: application/json
+```
 
-### Login
+Body :
 
 ```json
 {
@@ -83,16 +150,75 @@ Pour les routes protegees, envoyez aussi le header `role` :
 }
 ```
 
+### Voir les formations
+
+```http
+GET /formations
+```
+
 ### Ajouter une formation
+
+Header :
+
+```text
+role: admin
+```
+
+Body :
 
 ```json
 {
   "titre": "JavaScript",
-  "duree": "4 mois"
+  "duree": "4 semaines"
 }
 ```
 
-### Inscription
+### Modifier une formation
+
+```http
+PUT /formations/1
+```
+
+Header :
+
+```text
+role: admin
+```
+
+Body :
+
+```json
+{
+  "titre": "Developpement Web",
+  "duree": "2 mois"
+}
+```
+
+### Supprimer une formation
+
+```http
+DELETE /formations/1
+```
+
+Header :
+
+```text
+role: admin
+```
+
+### Inscrire un etudiant
+
+```http
+POST /inscriptions
+```
+
+Header :
+
+```text
+role: etudiant
+```
+
+Body :
 
 ```json
 {
@@ -100,3 +226,24 @@ Pour les routes protegees, envoyez aussi le header `role` :
   "formation_id": 1
 }
 ```
+
+### Voir les inscriptions d'un etudiant
+
+```http
+GET /mes-inscriptions/2
+```
+
+Header :
+
+```text
+role: etudiant
+```
+
+## Pourquoi ca reste debutant
+
+- seulement 3 tables
+- pas de token JWT
+- pas de roles compliques
+- les routes sont toutes dans `server.js`
+- Prisma remplace les requetes SQL longues
+- Docker lance toute l'infrastructure avec une seule commande
