@@ -1,17 +1,70 @@
-require("dotenv").config();
-
 const express = require("express");
 const cors = require("cors");
-const { PrismaClient } = require("@prisma/client");
 
-const app = express();
-const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
+function creerDonneesInitiales() {
+  return {
+    users: [
+      {
+        id: 1,
+        nom: "Admin",
+        prenom: "Systeme",
+        email: "admin@gmail.com",
+        password: "123456",
+        role: "admin",
+      },
+      {
+        id: 2,
+        nom: "Ali",
+        prenom: "Benali",
+        email: "ali@gmail.com",
+        password: "123456",
+        role: "etudiant",
+      },
+    ],
+    formations: [
+      {
+        id: 1,
+        titre: "Developpement Web",
+        duree: "30h",
+        niveau: "Debutant",
+      },
+      {
+        id: 2,
+        titre: "Base de donnees",
+        duree: "20h",
+        niveau: "Intermediaire",
+      },
+      {
+        id: 3,
+        titre: "Vue.js",
+        duree: "15h",
+        niveau: "Avance",
+      },
+    ],
+    inscriptions: [
+      {
+        id: 1,
+        etudiantId: 2,
+        formationId: 1,
+      },
+    ],
+    prochainIdFormation: 4,
+    prochainIdInscription: 2,
+  };
+}
 
-// Middleware tres simple: on envoie le role dans le header "role".
+function cacherPassword(user) {
+  return {
+    id: user.id,
+    nom: user.nom,
+    prenom: user.prenom,
+    email: user.email,
+    role: user.role,
+  };
+}
+
 function verifierRole(roleAttendu) {
   return (req, res, next) => {
     const role = req.headers.role;
@@ -26,56 +79,46 @@ function verifierRole(roleAttendu) {
   };
 }
 
-function cacherPassword(user) {
-  return {
-    id: user.id,
-    nom: user.nom,
-    prenom: user.prenom,
-    email: user.email,
-    role: user.role,
-  };
-}
+function creerApp() {
+  const app = express();
+  const donnees = creerDonneesInitiales();
+  const users = donnees.users;
+  let formations = donnees.formations;
+  let inscriptions = donnees.inscriptions;
+  let prochainIdFormation = donnees.prochainIdFormation;
+  let prochainIdInscription = donnees.prochainIdInscription;
 
-function erreurServeur(res, error) {
-  res.status(500).json({
-    message: "Erreur serveur.",
-    error: error.message,
-  });
-}
+  app.use(cors());
+  app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.json({
-    message: "API E-doc en marche.",
-    routes: [
-      "POST /login",
-      "GET /formations",
-      "POST /formations",
-      "PUT /formations/:id",
-      "DELETE /formations/:id",
-      "POST /inscriptions",
-      "DELETE /inscriptions/:id",
-      "GET /mes-inscriptions/:id",
-    ],
-  });
-});
-
-// Connexion simple avec email et password.
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({
-      message: "Email et password sont obligatoires.",
+  app.get("/", (req, res) => {
+    res.json({
+      message: "API E-doc en marche.",
+      routes: [
+        "POST /login",
+        "GET /formations",
+        "POST /formations",
+        "PUT /formations/:id",
+        "DELETE /formations/:id",
+        "POST /inscriptions",
+        "DELETE /inscriptions/:id",
+        "GET /mes-inscriptions/:id",
+      ],
     });
-  }
+  });
 
-  try {
-    const user = await prisma.user.findFirst({
-      where: {
-        email,
-        password,
-      },
-    });
+  app.post("/login", (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email et password sont obligatoires.",
+      });
+    }
+
+    const user = users.find(
+      (item) => item.email === email && item.password === password
+    );
 
     if (!user) {
       return res.status(401).json({
@@ -87,75 +130,54 @@ app.post("/login", async (req, res) => {
       message: "Connexion reussie.",
       user: cacherPassword(user),
     });
-  } catch (error) {
-    erreurServeur(res, error);
-  }
-});
+  });
 
-// Tous les utilisateurs peuvent voir les formations.
-app.get("/formations", async (req, res) => {
-  try {
-    const formations = await prisma.formation.findMany({
-      orderBy: {
-        id: "asc",
-      },
-    });
-
+  app.get("/formations", (req, res) => {
     res.json(formations);
-  } catch (error) {
-    erreurServeur(res, error);
-  }
-});
+  });
 
-// Admin: ajouter une formation.
-app.post("/formations", verifierRole("admin"), async (req, res) => {
-  const { titre, duree, niveau } = req.body;
+  app.post("/formations", verifierRole("admin"), (req, res) => {
+    const { titre, duree, niveau } = req.body;
 
-  if (!titre || !duree || !niveau) {
-    return res.status(400).json({
-      message: "Titre, duree et niveau sont obligatoires.",
-    });
-  }
+    if (!titre || !duree || !niveau) {
+      return res.status(400).json({
+        message: "Titre, duree et niveau sont obligatoires.",
+      });
+    }
 
-  try {
-    const formation = await prisma.formation.create({
-      data: {
-        titre,
-        duree,
-        niveau,
-      },
-    });
+    const nouvelleFormation = {
+      id: prochainIdFormation,
+      titre,
+      duree,
+      niveau,
+    };
+
+    formations.push(nouvelleFormation);
+    prochainIdFormation++;
 
     res.status(201).json({
       message: "Formation ajoutee avec succes.",
-      formation,
+      formation: nouvelleFormation,
     });
-  } catch (error) {
-    erreurServeur(res, error);
-  }
-});
+  });
 
-// Admin: modifier une formation.
-app.put("/formations/:id", verifierRole("admin"), async (req, res) => {
-  const id = Number(req.params.id);
-  const { titre, duree, niveau } = req.body;
+  app.put("/formations/:id", verifierRole("admin"), (req, res) => {
+    const id = Number(req.params.id);
+    const { titre, duree, niveau } = req.body;
 
-  if (!id) {
-    return res.status(400).json({
-      message: "Id de formation invalide.",
-    });
-  }
+    if (!id) {
+      return res.status(400).json({
+        message: "Id de formation invalide.",
+      });
+    }
 
-  if (!titre || !duree || !niveau) {
-    return res.status(400).json({
-      message: "Titre, duree et niveau sont obligatoires.",
-    });
-  }
+    if (!titre || !duree || !niveau) {
+      return res.status(400).json({
+        message: "Titre, duree et niveau sont obligatoires.",
+      });
+    }
 
-  try {
-    const formation = await prisma.formation.findUnique({
-      where: { id },
-    });
+    const formation = formations.find((item) => item.id === id);
 
     if (!formation) {
       return res.status(404).json({
@@ -163,79 +185,55 @@ app.put("/formations/:id", verifierRole("admin"), async (req, res) => {
       });
     }
 
-    const formationModifiee = await prisma.formation.update({
-      where: { id },
-      data: {
-        titre,
-        duree,
-        niveau,
-      },
-    });
+    formation.titre = titre;
+    formation.duree = duree;
+    formation.niveau = niveau;
 
     res.json({
       message: "Formation modifiee avec succes.",
-      formation: formationModifiee,
+      formation,
     });
-  } catch (error) {
-    erreurServeur(res, error);
-  }
-});
+  });
 
-// Admin: supprimer une formation.
-app.delete("/formations/:id", verifierRole("admin"), async (req, res) => {
-  const id = Number(req.params.id);
+  app.delete("/formations/:id", verifierRole("admin"), (req, res) => {
+    const id = Number(req.params.id);
 
-  if (!id) {
-    return res.status(400).json({
-      message: "Id de formation invalide.",
-    });
-  }
+    if (!id) {
+      return res.status(400).json({
+        message: "Id de formation invalide.",
+      });
+    }
 
-  try {
-    const formation = await prisma.formation.findUnique({
-      where: { id },
-    });
+    const formationExiste = formations.some((item) => item.id === id);
 
-    if (!formation) {
+    if (!formationExiste) {
       return res.status(404).json({
         message: "Formation non trouvee.",
       });
     }
 
-    await prisma.formation.delete({
-      where: { id },
-    });
+    formations = formations.filter((item) => item.id !== id);
+    inscriptions = inscriptions.filter((item) => item.formationId !== id);
 
     res.json({
       message: "Formation supprimee avec succes.",
     });
-  } catch (error) {
-    erreurServeur(res, error);
-  }
-});
+  });
 
-// Etudiant: s'inscrire a une formation.
-app.post("/inscriptions", verifierRole("etudiant"), async (req, res) => {
-  const etudiantId = Number(req.body.etudiant_id);
-  const formationId = Number(req.body.formation_id);
+  app.post("/inscriptions", verifierRole("etudiant"), (req, res) => {
+    const etudiantId = Number(req.body.etudiant_id);
+    const formationId = Number(req.body.formation_id);
 
-  if (!etudiantId || !formationId) {
-    return res.status(400).json({
-      message: "etudiant_id et formation_id sont obligatoires.",
-    });
-  }
+    if (!etudiantId || !formationId) {
+      return res.status(400).json({
+        message: "etudiant_id et formation_id sont obligatoires.",
+      });
+    }
 
-  try {
-    const etudiant = await prisma.user.findFirst({
-      where: {
-        id: etudiantId,
-        role: "etudiant",
-      },
-    });
-
-    const formation = await prisma.formation.findUnique({
-      where: { id: formationId },
-    });
+    const etudiant = users.find(
+      (item) => item.id === etudiantId && item.role === "etudiant"
+    );
+    const formation = formations.find((item) => item.id === formationId);
 
     if (!etudiant) {
       return res.status(404).json({
@@ -249,12 +247,10 @@ app.post("/inscriptions", verifierRole("etudiant"), async (req, res) => {
       });
     }
 
-    const dejaInscrit = await prisma.inscription.findFirst({
-      where: {
-        etudiantId,
-        formationId,
-      },
-    });
+    const dejaInscrit = inscriptions.some(
+      (item) =>
+        item.etudiantId === etudiantId && item.formationId === formationId
+    );
 
     if (dejaInscrit) {
       return res.status(400).json({
@@ -262,43 +258,38 @@ app.post("/inscriptions", verifierRole("etudiant"), async (req, res) => {
       });
     }
 
-    const inscription = await prisma.inscription.create({
-      data: {
-        etudiantId,
-        formationId,
-      },
-    });
+    const nouvelleInscription = {
+      id: prochainIdInscription,
+      etudiantId,
+      formationId,
+    };
+
+    inscriptions.push(nouvelleInscription);
+    prochainIdInscription++;
 
     res.status(201).json({
       message: "Inscription ajoutee avec succes.",
-      inscription,
+      inscription: nouvelleInscription,
     });
-  } catch (error) {
-    erreurServeur(res, error);
-  }
-});
+  });
 
-// Etudiant: se desinscrire d'une formation.
-app.delete("/inscriptions/:id", verifierRole("etudiant"), async (req, res) => {
-  const id = Number(req.params.id);
-  const etudiantId = Number(req.headers["etudiant-id"]);
+  app.delete("/inscriptions/:id", verifierRole("etudiant"), (req, res) => {
+    const id = Number(req.params.id);
+    const etudiantId = Number(req.headers["etudiant-id"]);
 
-  if (!id) {
-    return res.status(400).json({
-      message: "Id inscription invalide.",
-    });
-  }
+    if (!id) {
+      return res.status(400).json({
+        message: "Id inscription invalide.",
+      });
+    }
 
-  if (!etudiantId) {
-    return res.status(400).json({
-      message: "Id etudiant obligatoire.",
-    });
-  }
+    if (!etudiantId) {
+      return res.status(400).json({
+        message: "Id etudiant obligatoire.",
+      });
+    }
 
-  try {
-    const inscription = await prisma.inscription.findUnique({
-      where: { id },
-    });
+    const inscription = inscriptions.find((item) => item.id === id);
 
     if (!inscription) {
       return res.status(404).json({
@@ -312,65 +303,57 @@ app.delete("/inscriptions/:id", verifierRole("etudiant"), async (req, res) => {
       });
     }
 
-    await prisma.inscription.delete({
-      where: { id },
-    });
+    inscriptions = inscriptions.filter((item) => item.id !== id);
 
     res.json({
       message: "Desinscription effectuee avec succes.",
     });
-  } catch (error) {
-    erreurServeur(res, error);
-  }
-});
+  });
 
-// Etudiant: afficher ses inscriptions.
-app.get("/mes-inscriptions/:id", verifierRole("etudiant"), async (req, res) => {
-  const etudiantId = Number(req.params.id);
+  app.get("/mes-inscriptions/:id", verifierRole("etudiant"), (req, res) => {
+    const etudiantId = Number(req.params.id);
 
-  if (!etudiantId) {
-    return res.status(400).json({
-      message: "Id etudiant invalide.",
-    });
-  }
+    if (!etudiantId) {
+      return res.status(400).json({
+        message: "Id etudiant invalide.",
+      });
+    }
 
-  try {
-    const inscriptions = await prisma.inscription.findMany({
-      where: {
-        etudiantId,
-      },
-      include: {
-        formation: true,
-      },
-      orderBy: {
-        id: "asc",
-      },
-    });
+    const resultat = inscriptions
+      .filter((item) => item.etudiantId === etudiantId)
+      .map((inscription) => {
+        const formation = formations.find(
+          (item) => item.id === inscription.formationId
+        );
 
-    const resultat = inscriptions.map((inscription) => ({
-      id: inscription.id,
-      formationId: inscription.formationId,
-      titre: inscription.formation.titre,
-      duree: inscription.formation.duree,
-      niveau: inscription.formation.niveau,
-    }));
+        if (!formation) {
+          return null;
+        }
+
+        return {
+          id: inscription.id,
+          formationId: inscription.formationId,
+          titre: formation.titre,
+          duree: formation.duree,
+          niveau: formation.niveau,
+        };
+      })
+      .filter(Boolean);
 
     res.json(resultat);
-  } catch (error) {
-    erreurServeur(res, error);
-  }
-});
+  });
 
-async function startServer() {
-  try {
-    await prisma.$connect();
-
-    app.listen(PORT, () => {
-      console.log(`Serveur lance sur http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error("Impossible de demarrer le serveur :", error.message);
-  }
+  return app;
 }
 
-startServer();
+if (require.main === module) {
+  const app = creerApp();
+
+  app.listen(PORT, () => {
+    console.log(`Serveur lance sur http://localhost:${PORT}`);
+  });
+}
+
+module.exports = {
+  creerApp,
+};
