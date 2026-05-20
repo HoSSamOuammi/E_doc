@@ -1,40 +1,35 @@
-# Backend - Gestion des etudiants et des formations
+# Backend E-doc
 
-Backend simple avec Node.js, Express, MySQL et Prisma.
+Backend simple pour un projet etudiant.
+
+Le but est de montrer les bases d'une API REST avec Node.js et Express, sans base de donnees et sans configuration compliquee.
+
+## Ce que fait le backend
+
+- connexion simple avec email et password
+- affichage des formations
+- ajout, modification et suppression d'une formation par un admin
+- inscription d'un etudiant a une formation
+- affichage des inscriptions d'un etudiant
+
+Les donnees sont stockees dans des tableaux dans `server.js`.
+Quand le serveur redemarre, les donnees reviennent au depart.
+
+## Fichiers importants
+
+```text
+backend/
+  server.js       # toutes les routes de l'API
+  package.json    # scripts et dependances
+```
 
 ## Installation
 
-Placez-vous dans le dossier `backend` puis installez les dependances :
+Depuis le dossier `backend` :
 
 ```bash
 npm install
 ```
-
-## Configuration MySQL
-
-1. Creez un fichier `.env` dans `backend`
-2. Ajoutez votre connexion MySQL
-
-Exemple :
-
-```env
-DATABASE_URL="mysql://root:@localhost:3306/gestion_etudiants"
-```
-
-## Base de donnees avec Prisma
-
-1. Creez la base `gestion_etudiants` dans MySQL
-2. Lancez Prisma pour creer les tables
-3. Ajoutez les donnees de test
-
-Commandes :
-
-```bash
-npm run prisma:push
-npm run seed
-```
-
-Le fichier `database.sql` est aussi disponible si vous voulez creer la base manuellement.
 
 ## Lancer le serveur
 
@@ -42,39 +37,55 @@ Le fichier `database.sql` est aussi disponible si vous voulez creer la base manu
 npm start
 ```
 
-Le serveur demarre sur :
+Le backend est disponible ici :
 
 ```text
 http://localhost:5000
 ```
 
+## Tester rapidement
+
+```bash
+npm test
+```
+
+Cette commande verifie seulement que `server.js` ne contient pas d'erreur de syntaxe.
+
 ## Comptes de test
 
-- Admin : `admin@gmail.com` / `123456`
-- Etudiant : `ali@gmail.com` / `123456`
+Admin :
 
-## Authentification simple
+```text
+email: admin@gmail.com
+password: 123456
+role: admin
+```
 
-Le projet utilise un login simple avec `email` + `password`.
+Etudiant :
 
-Pour les routes protegees, envoyez aussi le header `role` :
-
-- `role: admin` pour ajouter, modifier ou supprimer une formation
-- `role: etudiant` pour faire une inscription ou voir les inscriptions
+```text
+email: ali@gmail.com
+password: 123456
+role: etudiant
+id: 2
+```
 
 ## Routes
 
-- `POST /login`
-- `GET /formations`
-- `POST /formations`
-- `PUT /formations/:id`
-- `DELETE /formations/:id`
-- `POST /inscriptions`
-- `GET /mes-inscriptions/:id`
+### Accueil
 
-## Exemples de body JSON
+```http
+GET /
+```
 
-### Login
+### Connexion
+
+```http
+POST /login
+Content-Type: application/json
+```
+
+Body :
 
 ```json
 {
@@ -83,16 +94,68 @@ Pour les routes protegees, envoyez aussi le header `role` :
 }
 ```
 
+### Voir les formations
+
+```http
+GET /formations
+```
+
 ### Ajouter une formation
+
+Cette route est reservee a l'admin.
+Il faut envoyer le header `role: admin`.
+
+```http
+POST /formations
+Content-Type: application/json
+role: admin
+```
+
+Body :
 
 ```json
 {
   "titre": "JavaScript",
-  "duree": "4 mois"
+  "duree": "4 semaines"
 }
 ```
 
-### Inscription
+### Modifier une formation
+
+```http
+PUT /formations/1
+Content-Type: application/json
+role: admin
+```
+
+Body :
+
+```json
+{
+  "titre": "Developpement Web",
+  "duree": "2 mois"
+}
+```
+
+### Supprimer une formation
+
+```http
+DELETE /formations/1
+role: admin
+```
+
+### Inscrire un etudiant
+
+Cette route est reservee a l'etudiant.
+Il faut envoyer le header `role: etudiant`.
+
+```http
+POST /inscriptions
+Content-Type: application/json
+role: etudiant
+```
+
+Body :
 
 ```json
 {
@@ -100,3 +163,19 @@ Pour les routes protegees, envoyez aussi le header `role` :
   "formation_id": 1
 }
 ```
+
+### Voir les inscriptions d'un etudiant
+
+```http
+GET /mes-inscriptions/2
+role: etudiant
+```
+
+## Pourquoi c'est simple
+
+- pas de base de donnees
+- pas de Prisma
+- pas de Docker
+- pas de token JWT
+- un seul fichier principal a expliquer
+- des commentaires courts dans le code
