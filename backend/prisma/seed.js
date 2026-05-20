@@ -37,10 +37,12 @@ async function main() {
         {
           titre: "Developpement Web",
           duree: "3 mois",
+          niveau: "Debutant",
         },
         {
           titre: "MySQL debutant",
           duree: "2 mois",
+          niveau: "Debutant",
         },
       ],
     });

@@ -169,7 +169,8 @@ Body :
 ```json
 {
   "titre": "JavaScript",
-  "duree": "4 semaines"
+  "duree": "4 semaines",
+  "niveau": "Debutant"
 }
 ```
 
@@ -190,7 +191,8 @@ Body :
 ```json
 {
   "titre": "Developpement Web",
-  "duree": "2 mois"
+  "duree": "2 mois",
+  "niveau": "Intermediaire"
 }
 ```
 

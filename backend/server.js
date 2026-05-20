@@ -108,11 +108,11 @@ app.get("/formations", async (req, res) => {
 
 // Admin: ajouter une formation.
 app.post("/formations", verifierRole("admin"), async (req, res) => {
-  const { titre, duree } = req.body;
+  const { titre, duree, niveau } = req.body;
 
-  if (!titre || !duree) {
+  if (!titre || !duree || !niveau) {
     return res.status(400).json({
-      message: "Titre et duree sont obligatoires.",
+      message: "Titre, duree et niveau sont obligatoires.",
     });
   }
 
@@ -121,6 +121,7 @@ app.post("/formations", verifierRole("admin"), async (req, res) => {
       data: {
         titre,
         duree,
+        niveau,
       },
     });
 
@@ -136,7 +137,7 @@ app.post("/formations", verifierRole("admin"), async (req, res) => {
 // Admin: modifier une formation.
 app.put("/formations/:id", verifierRole("admin"), async (req, res) => {
   const id = Number(req.params.id);
-  const { titre, duree } = req.body;
+  const { titre, duree, niveau } = req.body;
 
   if (!id) {
     return res.status(400).json({
@@ -144,9 +145,9 @@ app.put("/formations/:id", verifierRole("admin"), async (req, res) => {
     });
   }
 
-  if (!titre || !duree) {
+  if (!titre || !duree || !niveau) {
     return res.status(400).json({
-      message: "Titre et duree sont obligatoires.",
+      message: "Titre, duree et niveau sont obligatoires.",
     });
   }
 
@@ -166,6 +167,7 @@ app.put("/formations/:id", verifierRole("admin"), async (req, res) => {
       data: {
         titre,
         duree,
+        niveau,
       },
     });
 
@@ -302,6 +304,7 @@ app.get("/mes-inscriptions/:id", verifierRole("etudiant"), async (req, res) => {
       id: inscription.id,
       titre: inscription.formation.titre,
       duree: inscription.formation.duree,
+      niveau: inscription.formation.niveau,
     }));
 
     res.json(resultat);
