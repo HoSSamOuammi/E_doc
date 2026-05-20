@@ -2,7 +2,16 @@
 
 Backend simple pour un projet etudiant.
 
-Le but est de montrer les bases d'une API REST avec Node.js et Express, sans base de donnees et sans configuration compliquee.
+Le projet utilise :
+
+- Node.js
+- Express
+- Prisma
+- MySQL
+- Docker
+- Prisma Studio
+
+L'objectif est de garder un backend facile a expliquer en 1h, avec une vraie base de donnees visible dans Prisma Studio.
 
 ## Ce que fait le backend
 
@@ -12,44 +21,98 @@ Le but est de montrer les bases d'une API REST avec Node.js et Express, sans bas
 - inscription d'un etudiant a une formation
 - affichage des inscriptions d'un etudiant
 
-Les donnees sont stockees dans des tableaux dans `server.js`.
-Quand le serveur redemarre, les donnees reviennent au depart.
-
-## Fichiers importants
+## Structure importante
 
 ```text
 backend/
-  server.js       # toutes les routes de l'API
-  package.json    # scripts et dependances
+  server.js                 # routes Express
+  package.json              # scripts npm
+  Dockerfile                # image Docker du backend
+  docker-entrypoint.sh      # prepare Prisma puis lance le serveur
+  prisma/
+    schema.prisma           # tables Prisma
+    seed.js                 # donnees de test
+docker-compose.yml          # MySQL + backend + Prisma Studio
 ```
 
-## Installation
+## Lancer avec Docker
 
-Depuis le dossier `backend` :
+Depuis la racine du projet :
+
+```bash
+docker compose up --build
+```
+
+Services disponibles :
+
+```text
+Backend API    : http://localhost:5000
+Prisma Studio  : http://localhost:5555
+MySQL          : localhost:3307
+```
+
+Pour arreter :
+
+```bash
+docker compose down
+```
+
+Pour supprimer aussi les donnees MySQL :
+
+```bash
+docker compose down -v
+```
+
+## Prisma Studio
+
+Prisma Studio permet de voir les tables dans le navigateur.
+
+Avec Docker, il est lance automatiquement ici :
+
+```text
+http://localhost:5555
+```
+
+Tables visibles :
+
+- `User`
+- `Formation`
+- `Inscription`
+
+## Lancer sans Docker
+
+Il faut avoir MySQL lance sur le port `3307`.
+
+Depuis `backend` :
 
 ```bash
 npm install
 ```
 
-## Lancer le serveur
+Creer un fichier `.env` :
+
+```env
+DATABASE_URL="mysql://root:root@localhost:3307/gestion_etudiants"
+PORT=5000
+```
+
+Preparer la base :
+
+```bash
+npm run setup
+```
+
+Lancer le backend :
 
 ```bash
 npm start
 ```
 
-Le backend est disponible ici :
-
-```text
-http://localhost:5000
-```
-
-## Tester rapidement
+Lancer Prisma Studio :
 
 ```bash
-npm test
+npm run studio
 ```
-
-Cette commande verifie seulement que `server.js` ne contient pas d'erreur de syntaxe.
 
 ## Comptes de test
 
@@ -67,16 +130,9 @@ Etudiant :
 email: ali@gmail.com
 password: 123456
 role: etudiant
-id: 2
 ```
 
 ## Routes
-
-### Accueil
-
-```http
-GET /
-```
 
 ### Connexion
 
@@ -102,12 +158,9 @@ GET /formations
 
 ### Ajouter une formation
 
-Cette route est reservee a l'admin.
-Il faut envoyer le header `role: admin`.
+Header :
 
-```http
-POST /formations
-Content-Type: application/json
+```text
 role: admin
 ```
 
@@ -124,7 +177,11 @@ Body :
 
 ```http
 PUT /formations/1
-Content-Type: application/json
+```
+
+Header :
+
+```text
 role: admin
 ```
 
@@ -141,17 +198,23 @@ Body :
 
 ```http
 DELETE /formations/1
+```
+
+Header :
+
+```text
 role: admin
 ```
 
 ### Inscrire un etudiant
 
-Cette route est reservee a l'etudiant.
-Il faut envoyer le header `role: etudiant`.
-
 ```http
 POST /inscriptions
-Content-Type: application/json
+```
+
+Header :
+
+```text
 role: etudiant
 ```
 
@@ -168,14 +231,19 @@ Body :
 
 ```http
 GET /mes-inscriptions/2
+```
+
+Header :
+
+```text
 role: etudiant
 ```
 
-## Pourquoi c'est simple
+## Pourquoi ca reste debutant
 
-- pas de base de donnees
-- pas de Prisma
-- pas de Docker
+- seulement 3 tables
 - pas de token JWT
-- un seul fichier principal a expliquer
-- des commentaires courts dans le code
+- pas de roles compliques
+- les routes sont toutes dans `server.js`
+- Prisma remplace les requetes SQL longues
+- Docker lance toute l'infrastructure avec une seule commande
